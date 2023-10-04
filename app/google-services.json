@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "328916857419",
+    "project_id": "uberdani",
+    "storage_bucket": "uberdani.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:328916857419:android:d0b95fc5af65fd7a67d3ce",
+        "android_client_info": {
+          "package_name": "com.uberdani"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARfyexGMN95fFnLAewqD7yizbIeks3A5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
