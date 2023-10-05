@@ -5,6 +5,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.uberdani.models.Driver;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class DriverProvider {
     DatabaseReference mDatabase;
 
@@ -12,6 +15,12 @@ public class DriverProvider {
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers");
     }
     public Task<Void> create(Driver driver){
-        return mDatabase.child(driver.getId()).setValue(driver);
+        Map<String, Object> map= new HashMap<>();
+        map.put("name", driver.getName());
+        map.put("id", driver.getId());
+        map.put("email", driver.getEmail());
+        map.put("vehiclebrand", driver.getVehicleBrand());
+        map.put("vehicleplate", driver.getVehiclePlate());
+        return mDatabase.child(driver.getId()).setValue(map);
     }
 }

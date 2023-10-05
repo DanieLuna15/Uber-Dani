@@ -1,11 +1,10 @@
-package com.uberdani;
+package com.uberdani.activities.client;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
+import android.app.AlertDialog;
 import android.content.SharedPreferences;
-import android.database.DatabaseErrorHandler;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,19 +15,19 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.uberdani.R;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.models.Client;
-import com.uberdani.models.User;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.ClientProvider;
 
+import dmax.dialog.SpotsDialog;
+
 public class RegisterActivity extends AppCompatActivity {
-    SharedPreferences mPref;
+
     AuthProvider mAuthProvider;
     ClientProvider mClientProvider;
-
+    AlertDialog mDialog;
     TextInputEditText mtextInputName, mtextInputEmail, mtextInputPassword;
     Button mbtnRegister;
     @Override
@@ -41,7 +40,8 @@ public class RegisterActivity extends AppCompatActivity {
         mAuthProvider = new AuthProvider();
         mClientProvider = new ClientProvider();
 
-        mPref = getApplicationContext().getSharedPreferences("typeuser",MODE_PRIVATE);
+
+        mDialog = new SpotsDialog.Builder(RegisterActivity.this).setTitle("Registrando").setMessage("Aguarde por favor.").create();
 
         mtextInputName = findViewById(R.id.textInputName);
         mtextInputEmail = findViewById(R.id.textInputEmail);
@@ -65,6 +65,7 @@ public class RegisterActivity extends AppCompatActivity {
         if(!name.isEmpty() && !email.isEmpty() && !password.isEmpty()){
             if(password.length() >= 6){
                 register(name,email,password);
+                mDialog.show();
             }
             else{
                 Toast.makeText(this, "La contraseña debe tener almenos 8 caracteres", Toast.LENGTH_SHORT).show();
@@ -78,6 +79,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuthProvider.register(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
+                mDialog.hide();
                 if(task.isSuccessful()){
                     String id = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     Client client = new Client(id, name,email);

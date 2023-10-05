@@ -1,9 +1,11 @@
-package com.uberdani;
+package com.uberdani.activities;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+
+import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -17,9 +19,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.uberdani.R;
 import com.uberdani.includes.MyToolBar;
 
-import org.jetbrains.annotations.NonNls;
+import dmax.dialog.SpotsDialog;
 
 public class LoginActivity extends AppCompatActivity {
     TextInputEditText mtextInputEmail, mtextInputPassword;
@@ -29,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
 
     SharedPreferences mPref;
-
+    AlertDialog mDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,12 +44,14 @@ public class LoginActivity extends AppCompatActivity {
         mtextInputPassword = findViewById(R.id.textInputPassword);
         mbtnLogin = findViewById(R.id.btnLogin);
 
+        mDialog = new SpotsDialog.Builder(LoginActivity.this).setTitle("Accediendo").setMessage("Aguarde por favor.").create();
+
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         mPref = getApplicationContext().getSharedPreferences("typeuser",MODE_PRIVATE);
         String selectedUser = mPref.getString("user","");
-        Toast.makeText(this, "El valor que seleccionó fue: " + selectedUser, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "El valor que seleccionó fue: " + selectedUser, Toast.LENGTH_SHORT).show();
 
         mbtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,7 +59,6 @@ public class LoginActivity extends AppCompatActivity {
                 login();
             }
         });
-
     }
 
     private void login() {
@@ -62,6 +66,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = mtextInputPassword.getText().toString();
         if(!email.isEmpty() && !password.isEmpty()) {
             if (password.length() >= 8){
+                mDialog.show();
                 mAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -70,6 +75,7 @@ public class LoginActivity extends AppCompatActivity {
                         }else{
                             Toast.makeText(LoginActivity.this, "La contraseña o el correo son incorrectos", Toast.LENGTH_SHORT).show();
                         }
+                        mDialog.dismiss();
                     }
                 });
             }
