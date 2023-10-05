@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -103,7 +104,10 @@ public class RegisterDriverActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    Toast.makeText(RegisterDriverActivity.this, "Registro de Conductor exitoso! ya puede iniciar sesión", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterDriverActivity.this, "Registro de Conductor exitoso! Bienvenido usuario Conductor", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(RegisterDriverActivity.this, MapDriverActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                 }else{
                     Toast.makeText(RegisterDriverActivity.this, "Algo salió mal :(", Toast.LENGTH_SHORT).show();
                 }

@@ -7,13 +7,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.uberdani.R;
+import com.uberdani.activities.client.MapClientActivity;
+import com.uberdani.activities.driver.MapDriverActivity;
 
 public class MainActivity extends AppCompatActivity {
     Button mButtonIamClient;
     Button mButtonIamDriver;
-
     SharedPreferences mPref;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,26 @@ public class MainActivity extends AppCompatActivity {
                 goToSelectAuth();
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(FirebaseAuth.getInstance().getCurrentUser() != null){
+            String user = mPref.getString("user", "");
+            if(user.equals("client")){
+                Toast.makeText(MainActivity.this, "Hola de nuevo! Usuario Cliente", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, MapClientActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }else{
+                Toast.makeText(MainActivity.this, "Hola de nuevo! Usuario Conductor", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, MapDriverActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        }
+
     }
 
     private void goToSelectAuth() {

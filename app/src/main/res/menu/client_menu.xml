@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+    <item android:id="@+id/action_logout"
+        android:iconTint="@color/purple_500"
+        android:title="Cerrar sesión"
+        app:showAsAction="never">
+    </item>
+
+    <item android:id="@+id/action_1"
+        android:iconTint="@color/purple_500"
+        android:title="Ver conductores"
+        app:showAsAction="never">
+    </item>
+
+    <item android:id="@+id/action_2"
+        android:iconTint="@color/purple_500"
+        android:title="Calificar"
+        app:showAsAction="never">
+    </item>
+
+    <item android:id="@+id/action_3"
+        android:iconTint="@color/purple_500"
+        android:title="Mi cuenta"
+        app:showAsAction="never">
+    </item>
+</menu>
