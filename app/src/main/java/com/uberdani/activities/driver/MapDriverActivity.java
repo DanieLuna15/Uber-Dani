@@ -71,16 +71,16 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
                         mMarker.remove();
                     }
                     mMarker = mMap.addMarker(new MarkerOptions().position(
-                            new LatLng(location.getLatitude(), location.getLongitude())
-                            )
-                            .title("Tu posición")
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car))
+                                            new LatLng(location.getLatitude(), location.getLongitude())
+                                    )
+                                    .title("Tu posición")
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car))
                     );
                     mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
-                            new CameraPosition.Builder()
-                                    .target(new LatLng(location.getLatitude(),location.getLongitude()))
-                                    .zoom(17f)
-                                    .build()
+                                    new CameraPosition.Builder()
+                                            .target(new LatLng(location.getLatitude(),location.getLongitude()))
+                                            .zoom(17f)
+                                            .build()
                             )
                     );
                 }
@@ -88,6 +88,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
             super.onLocationResult(locationResult);
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +97,11 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
 
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
         //mbtnLogout = findViewById(R.id.btnLogout);
+        mAuthProvider = new AuthProvider();
+
+        mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mMapFragment.getMapAsync(this);
+
         mbtnConnect = findViewById(R.id.btnConnect);
         mbtnConnect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,10 +114,6 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
                 }
             }
         });
-        mAuthProvider = new AuthProvider();
-
-        mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mMapFragment.getMapAsync(this);
         /*mbtnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,7 +124,6 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
             }
         });*/
     }
-
     private void disconnect() {
         mbtnConnect.setText("CONECTARSE");
         mIsConnect = false;
@@ -145,7 +146,6 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         mLocationRequest.setSmallestDisplacement(5);
         startLocation();
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -172,32 +172,6 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         }
         else {
             // checkLocationPermissions();
-        }
-    }
-
-    private void startLocation(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                if(gpsActived()){
-                    mbtnConnect.setText("DESCONECTARSE");
-                    mIsConnect = true;
-                    mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-                }
-                else{
-                    showAlertDialogNOGPS();
-                }
-            }
-            else{
-                checkLocationPermissions();
-            }
-        }
-        else{
-            if(gpsActived()){
-                mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-            }
-            else{
-                showAlertDialogNOGPS();
-            }
         }
     }
 
@@ -231,6 +205,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
+
     private void showAlertDialogNOGPS(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Por favor activa tu ubicación para poder continuar")
@@ -249,6 +224,34 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
             isActive=true;
         }
         return isActive;
+    }
+
+    private void startLocation(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if(gpsActived()){
+                    mbtnConnect.setText("DESCONECTARSE");
+                    mIsConnect = true;
+                    mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+                }
+                else{
+                    showAlertDialogNOGPS();
+                }
+            }
+            else{
+                checkLocationPermissions();
+            }
+        }
+        else{
+            if(gpsActived()){
+                mbtnConnect.setText("DESCONECTARSE");
+                mIsConnect = true;
+                mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+            }
+            else{
+                showAlertDialogNOGPS();
+            }
+        }
     }
 
     @Override

@@ -36,7 +36,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.uberdani.R;
 import com.uberdani.activities.MainActivity;
-import com.uberdani.activities.driver.MapDriverActivity;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.providers.AuthProvider;
 
@@ -103,7 +102,6 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setSmallestDisplacement(5);
         startLocation();
-
     }
 
 
