@@ -59,6 +59,8 @@ dependencies {
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-database")
     implementation 'com.github.d-max:spots-dialog:0.7@aar'
-    implementation 'com.google.android.gms:play-services-maps:18.1.0'
 
+
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
 }
