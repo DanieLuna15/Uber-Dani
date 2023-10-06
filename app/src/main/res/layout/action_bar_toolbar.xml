@@ -9,7 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/purple_500"
-        app:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"
+        app:titleTextColor="@color/white"
+        app:theme="@style/ThemeOverlay.AppCompat.DayNight.ActionBar"
+
         />
 
 </com.google.android.material.appbar.AppBarLayout>
+    <!-- TEMA OPCIONAL app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"-->
