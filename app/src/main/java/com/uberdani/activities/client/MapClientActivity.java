@@ -23,6 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -32,12 +34,20 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DatabaseError;
 import com.uberdani.R;
 import com.uberdani.activities.MainActivity;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.providers.AuthProvider;
+import com.uberdani.providers.GeofireProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapClientActivity extends AppCompatActivity implements OnMapReadyCallback {
     //Button mbtnLogout;
@@ -48,23 +58,48 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
 
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocation;
+
+    private GeofireProvider mGeofireProvider;
     private final static int LOCATION_REQUEST_CODE = 1;
     private final static int SETTINGS_REQUEST_CODE = 2;
 
+    private Marker mMarker;
+    private LatLng mCurrentLatLng;
+    private List<Marker> mDriversMarkers = new ArrayList<>();
+
+    private boolean mIsFirstTime = true;
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             for(Location location: locationResult.getLocations()){
                 if(getApplicationContext()!=null){
+                    if(mMarker != null){
+                        mMarker.remove();
+                    }
+
+                    mCurrentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                    mMarker = mMap.addMarker(new MarkerOptions().position(
+                                            new LatLng(location.getLatitude(), location.getLongitude())
+                                    )
+                                    .title("Tu posición")
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_userlocation))
+                    );
                     mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                             new CameraPosition.Builder()
                                     .target(new LatLng(location.getLatitude(),location.getLongitude()))
                                     .zoom(15f)
                                     .build()
                     ));
+
+                    if(mIsFirstTime){
+                        mIsFirstTime = false;
+                        getActiveDrivers();
+                    }
+
                 }
             }
-            super.onLocationResult(locationResult);
+            //super.onLocationResult(locationResult);
         }
     };
     @Override
@@ -77,6 +112,7 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         //mbtnLogout = findViewById(R.id.btnLogout);
         mAuthProvider = new AuthProvider();
 
+        mGeofireProvider = new GeofireProvider();
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
         /*mbtnLogout.setOnClickListener(new View.OnClickListener() {
@@ -89,12 +125,68 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
             }
         });*/
     }
+    private void getActiveDrivers(){
+        mGeofireProvider.getActiveDrivers(mCurrentLatLng).addGeoQueryEventListener(new GeoQueryEventListener() {
+            @Override
+            public void onKeyEntered(String key, GeoLocation location) {
+                //aca añadiremos los marcadoresd de los conductores que se conecten en la aplicacion
+                for (Marker marker: mDriversMarkers){
+                    if(marker.getTag() != null){
+                        if(marker.getTag().equals(key)){
+                            return;
+                        }
+                    }
+                }
+                LatLng driverLatLng = new LatLng(location.latitude,location.longitude);
+                Marker marker = mMap.addMarker(new MarkerOptions().position(driverLatLng).title("Conductor Disponible").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_carlocation)));
+                marker.setTag(key);
+                mDriversMarkers.add(marker);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                //lo que pasa cuando un conductor se desconecta
+                for (Marker marker: mDriversMarkers){
+                    if(marker.getTag() != null){
+                        if(marker.getTag().equals(key)){
+                            marker.remove();
+                            mDriversMarkers.remove(marker);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                //para actualizar la posicion de cada conductor
+                for (Marker marker: mDriversMarkers){
+                    if(marker.getTag() != null){
+                        if(marker.getTag().equals(key)){
+                            marker.setPosition(new LatLng(location.latitude,location.longitude));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+
+            }
+        });
+    }
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.setMyLocationEnabled(false);
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(1000);
@@ -188,7 +280,7 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     private void showAlertDialogNOGPS(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Por favor activa tu ubicación para poder continuar")
-                .setPositiveButton("Ir a Configuración ->", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Ir a Configuración ➜", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), SETTINGS_REQUEST_CODE);
