@@ -165,7 +165,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.setMyLocationEnabled(false);
+        //mMap.setMyLocationEnabled(false);
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(1000);

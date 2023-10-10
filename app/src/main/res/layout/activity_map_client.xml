@@ -13,7 +13,53 @@
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:layout="@layout/activity_map_client"
         android:name="com.google.android.gms.maps.SupportMapFragment">
     </fragment>
 
+    <LinearLayout
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="5dp">
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@color/white"
+            android:layout_marginBottom="5dp"
+            app:cardCornerRadius="20dp">
+            <fragment
+                android:id="@+id/placeAutocompleteOrigin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/activity_map_client"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment">
+            </fragment>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@color/white"
+            app:cardCornerRadius="20dp">
+            <fragment
+                android:id="@+id/placeAutocompleteDestination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/activity_map_client"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment">
+            </fragment>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/icon_userlocation"
+        android:layout_gravity="center">
+    </ImageView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
