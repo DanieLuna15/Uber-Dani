@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQueryEventListener;
@@ -56,6 +57,7 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.google.firebase.database.DatabaseError;
 import com.google.maps.android.SphericalUtil;
 import com.uberdani.R;
+import com.uberdani.activities.LoginActivity;
 import com.uberdani.activities.MainActivity;
 import com.uberdani.activities.driver.MapDriverActivity;
 import com.uberdani.includes.MyToolBar;
@@ -64,6 +66,7 @@ import com.uberdani.providers.GeofireProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 
 public class MapClientActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -96,6 +99,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     private LatLng mDestinationLatLng;
 
     private GoogleMap.OnCameraIdleListener mCameraListener;
+
+    private Button mbtnRequestDriver;
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -149,14 +154,45 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
 
+        mbtnRequestDriver = findViewById(R.id.btnRequestDriver);
+
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
+            //Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
+            Places.initialize(getApplicationContext(),  "AIzaSyB7K3BPID2hFvGeIVNef6m1fKKbBX8hVS4");
         }
 
         mPlaces = Places.createClient(this);
         instanceAutocompleteOrigin();
         instanceAutocompleteDestination();
         onCameraMove();
+
+        mbtnRequestDriver.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestDriver();
+            }
+        });
+    }
+    private void requestDriver() {
+        Intent intent = new Intent(MapClientActivity.this, DetailRequestActivity.class);
+        intent.putExtra("origin_lat", mOriginLatLng.latitude);
+        intent.putExtra("origin_lng", mOriginLatLng.longitude);
+        //intent.putExtra("origin_lat", -16.5242587);
+        //intent.putExtra("origin_lng", -68.1119803);
+        intent.putExtra("destination_lat",  -16.527678);
+        intent.putExtra("destination_lng", -68.1083769);
+        startActivity(intent);
+        /*if (mOriginLatLng != null && mDestinationLatLng != null) {
+            Intent intent = new Intent(MapClientActivity.this, DetailRequestActivity.class);
+            intent.putExtra("origin_lat", mOriginLatLng.latitude);
+            intent.putExtra("origin_lng", mOriginLatLng.longitude);
+            intent.putExtra("destination_lat", mDestinationLatLng.latitude);
+            intent.putExtra("destination_lng", mDestinationLatLng.longitude);
+            startActivity(intent);
+        }
+        else{
+            Toast.makeText(this, "Debe seleccionar el lugar de recogida y de destino para poder continuar", Toast.LENGTH_SHORT).show();
+        }*/
     }
 
     private void limitSearch() {
@@ -223,6 +259,10 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
                     String address = addressList.get(0).getAddressLine(0);
                     mOrigin = address + " " + city;
                     mAutocomplete.setText(address + " " + city);
+                    mDestination = "Av. Estados Unidos 1487, La Paz, Bolivia";
+                    mAutocompleteDestination.setText("Av. Estados Unidos 1487, La Paz, Bolivia");
+                    Log.d("PLACE", "DIRECCION: " + address + " //  CIUDAD: " + city + " //  PAIS: " + country);
+                    Log.d("PLACE", "COMPLETE: " + mAutocomplete.toString());
                 } catch (Exception e) {
                     Log.d("Error ", "Mensaje error: " + e.getMessage());
                 }

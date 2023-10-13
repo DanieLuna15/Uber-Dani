@@ -62,4 +62,15 @@
         android:src="@drawable/icon_userlocation"
         android:layout_gravity="center">
     </ImageView>
+    <Button
+        android:id="@+id/btnRequestDriver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SOLICITAR VIAJE"
+        android:textColor="@color/white"
+        android:layout_gravity="bottom"
+        android:layout_margin="30dp"
+        android:theme="@style/ThemeOverlay.AppCompat.DayNight"
+        android:backgroundTint="@color/purple_500"
+        android:background="@drawable/rounded_button"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

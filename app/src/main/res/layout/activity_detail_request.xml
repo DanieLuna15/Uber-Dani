@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".activities.client.DetailRequestActivity">
+
+    <include layout="@layout/action_bar_toolbar"></include>
+
+    <LinearLayout
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <fragment
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:layout="@layout/activity_map_client"
+            android:name="com.google.android.gms.maps.SupportMapFragment">
+        </fragment>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Origen: "
+                android:textSize="16sp"
+                android:textStyle="bold">
+            </TextView>
+            <TextView
+                android:id="@+id/textViewOrigin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Carrera 34 calle 5"
+                android:textSize="16sp">
+            </TextView>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/quantum_grey"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp">
+
+        </View>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Destino: "
+                android:textSize="16sp"
+                android:textStyle="bold">
+            </TextView>
+            <TextView
+                android:id="@+id/textViewDestination"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Carrera 34 calle 5"
+                android:textSize="16sp">
+            </TextView>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnRequestNow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SOLICITAR AHORA"
+            android:textColor="@color/white"
+            android:theme="@style/ThemeOverlay.AppCompat.DayNight"
+            android:backgroundTint="@color/purple_500" />
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -174,7 +174,6 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         mLocationRequest.setSmallestDisplacement(5);
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
