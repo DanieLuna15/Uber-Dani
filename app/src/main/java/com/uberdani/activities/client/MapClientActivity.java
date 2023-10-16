@@ -158,7 +158,7 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
 
         if (!Places.isInitialized()) {
             //Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
-            Places.initialize(getApplicationContext(),  "AIzaSyB7K3BPID2hFvGeIVNef6m1fKKbBX8hVS4");
+            Places.initialize(getApplicationContext(), "AIzaSyB7K3BPID2hFvGeIVNef6m1fKKbBX8hVS4");
         }
 
         mPlaces = Places.createClient(this);
@@ -173,14 +173,17 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
             }
         });
     }
+
     private void requestDriver() {
         Intent intent = new Intent(MapClientActivity.this, DetailRequestActivity.class);
         intent.putExtra("origin_lat", mOriginLatLng.latitude);
         intent.putExtra("origin_lng", mOriginLatLng.longitude);
         //intent.putExtra("origin_lat", -16.5242587);
         //intent.putExtra("origin_lng", -68.1119803);
-        intent.putExtra("destination_lat",  -16.527678);
+        intent.putExtra("destination_lat", -16.527678);
         intent.putExtra("destination_lng", -68.1083769);
+        intent.putExtra("origin", mOrigin);
+        //intent.putExtra("destination", mDestination);
         startActivity(intent);
         /*if (mOriginLatLng != null && mDestinationLatLng != null) {
             Intent intent = new Intent(MapClientActivity.this, DetailRequestActivity.class);
@@ -188,6 +191,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
             intent.putExtra("origin_lng", mOriginLatLng.longitude);
             intent.putExtra("destination_lat", mDestinationLatLng.latitude);
             intent.putExtra("destination_lng", mDestinationLatLng.longitude);
+            intent.putExtra("origin", mOrigin);
+            intent.putExtra("destination", mDestination);
             startActivity(intent);
         }
         else{
@@ -196,15 +201,15 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     }
 
     private void limitSearch() {
-        LatLng northSide = SphericalUtil.computeOffset(mCurrentLatLng, 500,0);
-        LatLng southSide = SphericalUtil.computeOffset(mCurrentLatLng, 500,180);
+        LatLng northSide = SphericalUtil.computeOffset(mCurrentLatLng, 500, 0);
+        LatLng southSide = SphericalUtil.computeOffset(mCurrentLatLng, 500, 180);
         mAutocomplete.setCountries("BOL");
-        mAutocomplete.setLocationBias(RectangularBounds.newInstance(southSide,northSide));
+        mAutocomplete.setLocationBias(RectangularBounds.newInstance(southSide, northSide));
         mAutocompleteDestination.setCountries("BOL");
-        mAutocompleteDestination.setLocationBias(RectangularBounds.newInstance(southSide,northSide));
+        mAutocompleteDestination.setLocationBias(RectangularBounds.newInstance(southSide, northSide));
     }
 
-    private void instanceAutocompleteOrigin(){
+    private void instanceAutocompleteOrigin() {
         mAutocomplete = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.placeAutocompleteOrigin);
         mAutocomplete.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME));
         mAutocomplete.setHint("Lugar de recogida");
@@ -225,7 +230,7 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         });
     }
 
-    private void instanceAutocompleteDestination(){
+    private void instanceAutocompleteDestination() {
         mAutocompleteDestination = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.placeAutocompleteDestination);
         mAutocompleteDestination.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG, Place.Field.NAME));
         mAutocompleteDestination.setHint("Destino");
@@ -246,7 +251,7 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         });
     }
 
-    private void onCameraMove(){
+    private void onCameraMove() {
         mCameraListener = new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
@@ -257,8 +262,10 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
                     String city = addressList.get(0).getLocality();
                     String country = addressList.get(0).getCountryName();
                     String address = addressList.get(0).getAddressLine(0);
-                    mOrigin = address + " " + city;
-                    mAutocomplete.setText(address + " " + city);
+                    //mOrigin = address + " " + city;
+                    //mAutocomplete.setText(address + " " + city);
+                    mOrigin = address;
+                    mAutocomplete.setText(address);
                     mDestination = "Av. Estados Unidos 1487, La Paz, Bolivia";
                     mAutocompleteDestination.setText("Av. Estados Unidos 1487, La Paz, Bolivia");
                     Log.d("PLACE", "DIRECCION: " + address + " //  CIUDAD: " + city + " //  PAIS: " + country);
@@ -269,8 +276,9 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
             }
         };
     }
+
     private void getActiveDrivers() {
-        mGeofireProvider.getActiveDrivers(mCurrentLatLng).addGeoQueryEventListener(new GeoQueryEventListener() {
+        mGeofireProvider.getActiveDrivers(mCurrentLatLng, 10).addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
                 //aca añadiremos los marcadoresd de los conductores que se conecten en la aplicacion
@@ -344,71 +352,62 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == LOCATION_REQUEST_CODE){
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                    if(gpsActived()){
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (gpsActived()) {
                         mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
                         mMap.setMyLocationEnabled(true);
-                    }
-                    else{
+                    } else {
                         showAlertDialogNOGPS();
                     }
-                }
-                else{
+                } else {
                     checkLocationPermissions();
                 }
-            }
-            else{
+            } else {
                 checkLocationPermissions();
             }
-        }
-        else {
+        } else {
             // checkLocationPermissions();
         }
     }
 
-    private void startLocation(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                if(gpsActived()){
+    private void startLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (gpsActived()) {
                     mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
                     mMap.setMyLocationEnabled(true);
-                }
-                else{
+                } else {
                     showAlertDialogNOGPS();
                 }
-            }
-            else{
+            } else {
                 checkLocationPermissions();
             }
-        }
-        else{
-            if(gpsActived()){
+        } else {
+            if (gpsActived()) {
                 mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
                 mMap.setMyLocationEnabled(true);
-            }
-            else{
+            } else {
                 showAlertDialogNOGPS();
             }
         }
     }
 
-    private void checkLocationPermissions(){
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+    private void checkLocationPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 new AlertDialog.Builder(this)
                         .setTitle("Proporciona los permisos para continuar")
                         .setMessage("Esta aplicación requiere de los permisos de ubicación para utilizarse")
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(MapClientActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_REQUEST_CODE);
+                                ActivityCompat.requestPermissions(MapClientActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
                             }
                         }).create().show();
-            }
-            else{
-                ActivityCompat.requestPermissions(MapClientActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_REQUEST_CODE);
+            } else {
+                ActivityCompat.requestPermissions(MapClientActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
             }
         }
     }
@@ -417,6 +416,16 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SETTINGS_REQUEST_CODE && gpsActived()) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
             mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
             mMap.setMyLocationEnabled(true);
         }
@@ -465,5 +474,9 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         Intent intent = new Intent(MapClientActivity.this,MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    void generateToken(){
+
     }
 }

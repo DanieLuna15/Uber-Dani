@@ -16,6 +16,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UberDani"
         tools:targetApi="32">
+
+        <service android:name=".services.MyFirebaseMessagingClient"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT">
+                </action>
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name=".activities.client.RequestDriverActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
         <activity
             android:name=".activities.client.DetailRequestActivity"
             android:exported="false"

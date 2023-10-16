@@ -31,7 +31,9 @@ public class RegisterActivity extends AppCompatActivity {
     AuthProvider mAuthProvider;
     ClientProvider mClientProvider;
     AlertDialog mDialog;
-    TextInputEditText mtextInputName, mtextInputEmail, mtextInputPassword;
+    TextInputEditText mtextInputName;
+    TextInputEditText mtextInputEmail;
+    TextInputEditText mtextInputPassword;
     Button mbtnRegister;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
