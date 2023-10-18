@@ -63,6 +63,7 @@ import com.uberdani.activities.driver.MapDriverActivity;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.GeofireProvider;
+import com.uberdani.providers.TokenProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +80,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     private FusedLocationProviderClient mFusedLocation;
 
     private GeofireProvider mGeofireProvider;
+    private TokenProvider mTokenProvider;
+
     private final static int LOCATION_REQUEST_CODE = 1;
     private final static int SETTINGS_REQUEST_CODE = 2;
 
@@ -150,6 +153,7 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
         //mbtnLogout = findViewById(R.id.btnLogout);
         mGeofireProvider = new GeofireProvider();
+        mTokenProvider = new TokenProvider();
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
@@ -157,8 +161,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         mbtnRequestDriver = findViewById(R.id.btnRequestDriver);
 
         if (!Places.isInitialized()) {
-            //Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
-            Places.initialize(getApplicationContext(), "AIzaSyB7K3BPID2hFvGeIVNef6m1fKKbBX8hVS4");
+            Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
+            //Places.initialize(getApplicationContext(), "AIzaSyB7K3BPID2hFvGeIVNef6m1fKKbBX8hVS4");
         }
 
         mPlaces = Places.createClient(this);
@@ -172,6 +176,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
                 requestDriver();
             }
         });
+
+        generateToken();
     }
 
     private void requestDriver() {
@@ -477,6 +483,6 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     }
 
     void generateToken(){
-
+        mTokenProvider.create(mAuthProvider.getId());
     }
 }

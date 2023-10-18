@@ -48,13 +48,16 @@ import com.uberdani.activities.client.MapClientActivity;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.GeofireProvider;
+import com.uberdani.providers.TokenProvider;
 
 public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
     AuthProvider mAuthProvider;
+
     private GeofireProvider mGeofireProvider;
+    private TokenProvider mTokenProvider;
 
     //Button mbtnLogout;
     Button mbtnConnect;
@@ -132,6 +135,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         });
         mAuthProvider = new AuthProvider();
         mGeofireProvider = new GeofireProvider();
+        mTokenProvider = new TokenProvider();
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
@@ -144,6 +148,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
                 finish();
             }
         });*/
+        generateToken();
     }
 
     private void disconnect() {
@@ -298,5 +303,9 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         Intent intent = new Intent(MapDriverActivity.this,MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    void generateToken(){
+        mTokenProvider.create(mAuthProvider.getId());
     }
 }

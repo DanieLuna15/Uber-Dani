@@ -54,25 +54,6 @@ public class MainActivity extends AppCompatActivity {
                 goToSelectAuth();
             }
         });
-
-        /*FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            System.out.println("Fetching FCM registration token failed");
-                            return;
-                        }
-
-                        // Get new FCM registration token
-                        String token = task.getResult();
-
-                        // Log and toast
-                        Log.d(TAG, token);
-                        Toast.makeText(MainActivity.this, "TU TOKEN ES: " + token, Toast.LENGTH_SHORT).show();
-                        //fZ8decKxSAOsd-OB8sUfPL:APA91bHyIX8cOwM-hL4E9JCyJrQOKx_lfR6nMpYUjC3psck9RwXO1NWrXLklZcHzT8IQgsjs5d3FecSRVUlN4bT2ubOL6wB7ECvpXsUWCJMdMjdECD0j_AACdUsMW_FgDqbrOnlhhmSc
-                    }
-                });*/
     }
 
     @Override

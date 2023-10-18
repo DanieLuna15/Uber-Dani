@@ -15,7 +15,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.internal.IdTokenListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-//import com.google.firebase.iid.FirebaseInstanceId;
 
 import com.google.firebase.iid.FirebaseInstanceIdReceiver;
 import com.google.firebase.iid.internal.FirebaseInstanceIdInternal;
@@ -28,12 +27,29 @@ public class TokenProvider {
 
     DatabaseReference mDatabase;
 
-    public TokenProvider(DatabaseReference mDatabase) {
+    public TokenProvider() {
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Tokens");
     }
 
+    public void create(String idUser){
+        if(idUser == null) return;
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+            @Override
+            public void onComplete(@NonNull Task<String> task) {
+                if (!task.isSuccessful()) {
+                    System.out.println("Fetching FCM registration token failed");
+                    return;
+                }
+                else {
+                    Token token = new Token(task.getResult());
+                    //Log.d("Token", token.toString());
+                    mDatabase.child(idUser).setValue(token);
+                }
+            }
+        });
+    }
 
-    public void create() {
-
+    public DatabaseReference getToken(String idUser){
+        return mDatabase.child(idUser);
     }
 }
