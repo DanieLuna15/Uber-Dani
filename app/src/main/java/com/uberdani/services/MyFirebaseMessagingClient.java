@@ -14,11 +14,15 @@ import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.uberdani.R;
 import com.uberdani.channel.NotificationHelper;
+import com.uberdani.receivers.AcceptReceiver;
 
 import java.util.Map;
 
 public class MyFirebaseMessagingClient extends FirebaseMessagingService {
+
+    private static final int NOTIFICATION_CODE = 100;
 
     @Override
     public void onNewToken(@NonNull String token) {
@@ -33,29 +37,77 @@ public class MyFirebaseMessagingClient extends FirebaseMessagingService {
         String title = data.get("title");
         String body = data.get("body");
 
-        if(title != null){
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-                showNotificationApiOreo(title,body);
-            }else{
-                showNotification(title,body);
+        if (title != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (title.contains("SOLICITUD DE SERVICIO")) {
+                    String idClient = data.get("idClient");
+                    showNotificationApiOreoActions(title, body, idClient);
+                }
+                else {
+                    showNotificationApiOreo(title, body);
+                }
+            }
+            else {
+                if (title.contains("SOLICITUD DE SERVICIO")) {
+                    String idClient = data.get("idClient");
+                    showNotificationActions(title, body, idClient);
+                }
+                else {
+                    showNotification(title, body);
+                }
             }
         }
     }
     private void showNotification(String title, String body) {
-        PendingIntent intent = PendingIntent.getActivity(getBaseContext(), 0, new Intent(), PendingIntent.FLAG_MUTABLE); //O INMUTABLE
+        PendingIntent intent = PendingIntent.getActivity(getBaseContext(), 0, new Intent(), PendingIntent.FLAG_ONE_SHOT); //O INMUTABLE
         Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationHelper notificationHelper = new NotificationHelper(getBaseContext());
         NotificationCompat.Builder builder = notificationHelper.getNotificationOldAPI(title, body, intent, sound);
         notificationHelper.getManager().notify(1, builder.build());
     }
 
+    private void showNotificationActions(String title, String body, String idClient) {
+        Intent acceptIntent = new Intent(this, AcceptReceiver.class);
+        acceptIntent.putExtra("idClient", idClient);
+        PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT); //O INMUTABLE
+
+        NotificationCompat.Action acceptAction = new NotificationCompat.Action.Builder(
+                R.mipmap.ic_launcher,
+                "Aceptar",
+                acceptPendingIntent
+        ).build();
+
+        Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationHelper notificationHelper = new NotificationHelper(getBaseContext());
+        NotificationCompat.Builder builder = notificationHelper.getNotificationOldAPIActions(title, body, sound, acceptAction);
+        notificationHelper.getManager().notify(2, builder.build());
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void showNotificationApiOreo(String title, String body) {
-        PendingIntent intent = PendingIntent.getActivity(getBaseContext(), 0, new Intent(), PendingIntent.FLAG_MUTABLE);  //O INMUTABLE
+        PendingIntent intent = PendingIntent.getActivity(getBaseContext(), 0, new Intent(), PendingIntent.FLAG_ONE_SHOT);  //O INMUTABLE
         Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationHelper notificationHelper = new NotificationHelper(getBaseContext());
         Notification.Builder builder = notificationHelper.getNotification(title, body, intent, sound);
         notificationHelper.getManager().notify(1, builder.build());
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void showNotificationApiOreoActions(String title, String body, String idClient) {
+        Intent acceptIntent = new Intent(this, AcceptReceiver.class);
+        acceptIntent.putExtra("idClient", idClient);
+        PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification.Action acceptAction = new Notification.Action.Builder(
+                R.mipmap.ic_launcher,
+                "Aceptar",
+                acceptPendingIntent
+        ).build();
+
+        Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationHelper notificationHelper = new NotificationHelper(getBaseContext());
+        Notification.Builder builder = notificationHelper.getNotificationActions(title, body, sound, acceptAction);
+        notificationHelper.getManager().notify(2, builder.build());
     }
 }
 

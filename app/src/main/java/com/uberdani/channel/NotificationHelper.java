@@ -59,7 +59,22 @@ public class NotificationHelper extends ContextWrapper {
                 .setAutoCancel(true)
                 .setSound(soundUri)
                 .setContentIntent(intent)
-                .setSmallIcon(R.drawable.ic_car);
+                .setSmallIcon(R.drawable.ic_car)
+                .setStyle(new Notification.BigTextStyle()
+                        .bigText(body).setBigContentTitle(title));
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public Notification.Builder getNotificationActions(String title, String body, Uri soundUri, Notification.Action acceptAction){
+        return new Notification.Builder(getApplicationContext(),CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setSound(soundUri)
+                .setSmallIcon(R.drawable.ic_car)
+                .addAction(acceptAction)
+                .setStyle(new Notification.BigTextStyle()
+                        .bigText(body).setBigContentTitle(title));
     }
 
     public NotificationCompat.Builder getNotificationOldAPI(String title, String body, PendingIntent intent, Uri soundUri){
@@ -69,6 +84,20 @@ public class NotificationHelper extends ContextWrapper {
                 .setAutoCancel(true)
                 .setSound(soundUri)
                 .setContentIntent(intent)
-                .setSmallIcon(R.drawable.ic_car);
+                .setSmallIcon(R.drawable.ic_car)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(body).setBigContentTitle(title));
+    }
+
+    public NotificationCompat.Builder getNotificationOldAPIActions(String title, String body, Uri soundUri, NotificationCompat.Action acceptAction){
+        return new NotificationCompat.Builder(getApplicationContext(),CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setSound(soundUri)
+                .setSmallIcon(R.drawable.ic_car)
+                .addAction(acceptAction)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(body).setBigContentTitle(title));
     }
 }

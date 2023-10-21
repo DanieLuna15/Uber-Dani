@@ -62,7 +62,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     //Button mbtnLogout;
     Button mbtnConnect;
 
-    private Boolean mIsConnect=false;
+    private Boolean mIsConnect = false;
 
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocation;
@@ -77,25 +77,25 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
-            for(Location location: locationResult.getLocations()){
-                if(getApplicationContext()!=null){
+            for (Location location : locationResult.getLocations()) {
+                if (getApplicationContext() != null) {
 
                     mCurrentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
-                    if(mMarker != null){
+                    if (mMarker != null) {
                         mMarker.remove();
                     }
 
                     mMarker = mMap.addMarker(new MarkerOptions().position(
-                            new LatLng(location.getLatitude(), location.getLongitude())
-                            )
-                            .title("Tu posición")
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_carlocation))
+                                            new LatLng(location.getLatitude(), location.getLongitude())
+                                    )
+                                    .title("Tu posición")
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_carlocation))
                     );
 
                     mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
                             new CameraPosition.Builder()
-                                    .target(new LatLng(location.getLatitude(),location.getLongitude()))
+                                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
                                     .zoom(16.5f)
                                     .build()
                     ));
@@ -108,7 +108,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     };
 
     private void updateLocation() {
-        if(mAuthProvider.existSession() && mCurrentLatLng != null){
+        if (mAuthProvider.existSession() && mCurrentLatLng != null) {
             mGeofireProvider.saveLocation(mAuthProvider.getId(), mCurrentLatLng);
         }
     }
@@ -117,7 +117,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_driver);
-        MyToolBar.show(this,"Conductor",false);
+        MyToolBar.show(this, "Conductor", false);
 
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
         //mbtnLogout = findViewById(R.id.btnLogout);
@@ -125,10 +125,9 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         mbtnConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mIsConnect){
+                if (mIsConnect) {
                     disconnect();
-                }
-                else{
+                } else {
                     startLocation();
                 }
             }
@@ -152,15 +151,14 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     }
 
     private void disconnect() {
-        if(mFusedLocation != null){
+        if (mFusedLocation != null) {
             mbtnConnect.setText("CONECTARSE");
             mIsConnect = false;
             mFusedLocation.removeLocationUpdates(mLocationCallback);
-            if(mAuthProvider.existSession()){
+            if (mAuthProvider.existSession()) {
                 mGeofireProvider.removeLocation(mAuthProvider.getId());
             }
-        }
-        else{
+        } else {
             Toast.makeText(this, "No te puedes Desconectar", Toast.LENGTH_SHORT).show();
         }
     }
@@ -182,72 +180,63 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == LOCATION_REQUEST_CODE){
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-                    if(gpsActived()){
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (gpsActived()) {
                         mbtnConnect.setText("DESCONECTARSE");
                         mIsConnect = true;
                         mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-                    }
-                    else{
+                    } else {
                         showAlertDialogNOGPS();
                     }
-                }
-                else{
+                } else {
                     checkLocationPermissions();
                 }
-            }
-            else{
+            } else {
                 checkLocationPermissions();
             }
-        }
-        else {
+        } else {
             // checkLocationPermissions();
         }
     }
 
-    private void startLocation(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                if(gpsActived()){
+    private void startLocation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (gpsActived()) {
                     mbtnConnect.setText("DESCONECTARSE");
                     mIsConnect = true;
                     mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-                }
-                else{
+                } else {
                     showAlertDialogNOGPS();
                 }
-            }
-            else{
+            } else {
                 checkLocationPermissions();
             }
-        }
-        else{
-            if(gpsActived()){
+        } else {
+            if (gpsActived()) {
                 mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-            }
-            else{
+            } else {
                 showAlertDialogNOGPS();
             }
         }
     }
 
-    private void checkLocationPermissions(){
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+    private void checkLocationPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 new AlertDialog.Builder(this)
                         .setTitle("Proporciona los permisos para continuar")
                         .setMessage("Esta aplicación requiere de los permisos de ubicación para utilizarse")
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(MapDriverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_REQUEST_CODE);
+                                ActivityCompat.requestPermissions(MapDriverActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
                             }
                         }).create().show();
-            }
-            else{
-                ActivityCompat.requestPermissions(MapDriverActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_REQUEST_CODE);
+            } else {
+                ActivityCompat.requestPermissions(MapDriverActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
             }
         }
     }
@@ -255,7 +244,17 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == SETTINGS_REQUEST_CODE && gpsActived()){
+        if (requestCode == SETTINGS_REQUEST_CODE && gpsActived()) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
             mFusedLocation.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
         }
         else{

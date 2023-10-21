@@ -31,7 +31,7 @@ public class GoogleApiProvider {
                 + "origin=" + originLatLng.latitude + "," + originLatLng.longitude + "&"
                 + "destination=" + destinationLatLng.latitude + "," + destinationLatLng.longitude + "&"
                 + "departure_time=" + (new Date().getTime() + (60*60*1000)) + "&"
-                + "traffic_model=best_guess" + "&"
+                + "traffic_model=best_guess&"
                 + "key=" + context.getResources().getString(R.string.google_maps_key);*/
         return RetrofitClient.getClient(baseurl).create(IGoogleApi.class).getDirections(baseurl + query);
     }
