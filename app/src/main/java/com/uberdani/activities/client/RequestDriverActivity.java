@@ -244,7 +244,7 @@ public class RequestDriverActivity extends AppCompatActivity {
                     });
                 }
                 else{
-                    Toast.makeText(RequestDriverActivity.this, "No se pudo enviar la notificación porque el conductor no tiene un token de sesion", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RequestDriverActivity.this, "No se pudo enviar la notificación porque el conductor no tiene un token de sesión", Toast.LENGTH_SHORT).show();
 
                 }
             }

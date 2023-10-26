@@ -33,6 +33,7 @@ public class AcceptReceiver extends BroadcastReceiver {
         Intent intent1 = new Intent(context, MapDriverBookingActivity.class);
         intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent1.setAction(Intent.ACTION_RUN);
+        intent1.putExtra("idClient", idClient);
         context.startActivity(intent1);
     }
 }

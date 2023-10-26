@@ -20,8 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            tools:layout="@layout/activity_map_client"
-            android:name="com.google.android.gms.maps.SupportMapFragment">
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            tools:layout="@layout/activity_detail_request">
         </fragment>
         <LinearLayout
             android:layout_width="match_parent"
@@ -130,7 +130,7 @@
             android:id="@+id/btnRequestNow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SOLICITAR AHORA"
+            android:text="SOLICITAR VIAJE"
             android:textColor="@color/white"
             android:theme="@style/ThemeOverlay.AppCompat.DayNight"
             android:backgroundTint="@color/purple_500" />

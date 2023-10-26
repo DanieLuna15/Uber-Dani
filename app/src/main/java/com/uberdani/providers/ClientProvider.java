@@ -14,11 +14,16 @@ public class ClientProvider {
     public ClientProvider() {
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child("Clients");
     }
+
     public Task<Void> create(Client client){
         Map<String, Object> map= new HashMap<>();
         map.put("name", client.getName());
-        map.put("id", client.getId());
+        //map.put("id", client.getId());
         map.put("email", client.getEmail());
         return mDatabase.child(client.getId()).setValue(map);
+    }
+
+    public DatabaseReference getClient(String idClient) {
+        return mDatabase.child(idClient);
     }
 }

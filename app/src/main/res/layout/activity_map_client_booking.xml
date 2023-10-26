@@ -8,10 +8,11 @@
     android:layout_height="match_parent"
     tools:context=".activities.client.MapClientBookingActivity">
 
-    <TextView
+    <fragment
+        android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="MAPA DE EL VIAJE DEL CLIENTE">
-    </TextView>
-
+        android:layout_height="match_parent"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        tools:layout="@layout/activity_map_client_booking">
+    </fragment>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

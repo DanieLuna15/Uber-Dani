@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -35,8 +36,12 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
 import com.uberdani.providers.AuthProvider;
+import com.uberdani.providers.ClientProvider;
 import com.uberdani.providers.GeofireProvider;
 import com.uberdani.providers.TokenProvider;
 
@@ -46,6 +51,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
     private SupportMapFragment mMapFragment;
     AuthProvider mAuthProvider;
     private GeofireProvider mGeofireProvider;
+    private ClientProvider mClientProvider;
     private TokenProvider mTokenProvider;
 
     private LocationRequest mLocationRequest;
@@ -56,6 +62,11 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
 
     private Marker mMarker;
     private LatLng mCurrentLatLng;
+
+    private TextView mTextViewClientBooking;
+    private TextView mTextViewEmailBooking;
+
+    private String mExtraClientId;
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -97,11 +108,37 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mAuthProvider = new AuthProvider();
         mGeofireProvider = new GeofireProvider("drivers_working");
         mTokenProvider = new TokenProvider();
+        mClientProvider = new ClientProvider();
 
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
+
+        mTextViewClientBooking = findViewById(R.id.textViewClientBooking);
+        mTextViewEmailBooking = findViewById(R.id.textViewClientEmailBooking);
+
+        mExtraClientId = getIntent().getStringExtra("idClient");
+        getClientBooking();
+    }
+
+    private void getClientBooking() {
+        mClientProvider.getClient(mExtraClientId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String name = snapshot.child("name").getValue().toString();
+                    String email = snapshot.child("email").getValue().toString();
+                    mTextViewClientBooking.setText(name);
+                    mTextViewEmailBooking.setText(email);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void updateLocation() {

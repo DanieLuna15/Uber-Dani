@@ -21,8 +21,8 @@ public class AuthProvider {
         mAuth.signOut();
     }
 
-    public String getId(){
-        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+    public String getId() {
+        return mAuth.getCurrentUser().getUid();
     }
 
     public boolean existSession(){

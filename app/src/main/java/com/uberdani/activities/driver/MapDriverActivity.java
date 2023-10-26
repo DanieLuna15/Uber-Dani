@@ -154,7 +154,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mListener != null){
+        if (mListener != null) {
             mGeofireProvider.isDriverWorking(mAuthProvider.getId()).removeEventListener(mListener);
         }
     }
