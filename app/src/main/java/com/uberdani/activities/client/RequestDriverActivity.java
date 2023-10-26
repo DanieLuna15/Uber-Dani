@@ -3,7 +3,9 @@ package com.uberdani.activities.client;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -72,6 +74,8 @@ public class RequestDriverActivity extends AppCompatActivity {
     private AuthProvider mAuthProvider;
     private GoogleApiProvider mGoogleApiProvider;
 
+    private ValueEventListener mListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,7 +96,7 @@ public class RequestDriverActivity extends AppCompatActivity {
         mOriginLatLng = new LatLng(mExtraOriginLat,mExtraOriginLng);
         mDestinationLatLng = new LatLng(mExtraDestinationLat,mExtraDestinationLng);
 
-        mGeofireProvider = new GeofireProvider();
+        mGeofireProvider = new GeofireProvider("active_drivers");
         mTokenProvider = new TokenProvider();
         mNotificationProvider = new NotificationProvider();
         mClientBookingProvider = new ClientBookingProvider();
@@ -219,7 +223,8 @@ public class RequestDriverActivity extends AppCompatActivity {
                                     mClientBookingProvider.create(clientBooking).addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            Toast.makeText(RequestDriverActivity.this, "La petición se creó exitosamente", Toast.LENGTH_SHORT).show();
+                                            //Toast.makeText(RequestDriverActivity.this, "La petición se creó exitosamente", Toast.LENGTH_SHORT).show();
+                                            checkStatusClientBooking();
                                         }
                                     });
                                     //Toast.makeText(RequestDriverActivity.this, "Su notificación se ha enviado corrrectamente", Toast.LENGTH_SHORT).show();
@@ -248,5 +253,42 @@ public class RequestDriverActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+
+    private void checkStatusClientBooking() {
+        mListener = mClientBookingProvider.getStatus(mAuthProvider.getId()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+
+                    String status = dataSnapshot.getValue().toString();
+                    if (status.equals("accept")) {
+                        Intent intent = new Intent(RequestDriverActivity.this, MapClientBookingActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else if (status.equals("cancel")) {
+                        Toast.makeText(RequestDriverActivity.this, "El conductor no aceptó el viaje.", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(RequestDriverActivity.this, MapClientActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mListener != null){
+            mClientBookingProvider.getStatus(mAuthProvider.getId()).removeEventListener(mListener);
+        }
     }
 }

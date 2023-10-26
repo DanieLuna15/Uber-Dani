@@ -26,4 +26,8 @@ public class ClientBookingProvider {
         return mDatabase.child(idClientBooking).updateChildren(map);
     }
 
+    public DatabaseReference getStatus(String idClientBooking){
+        return mDatabase.child(idClientBooking).child("status");
+    }
+
 }

@@ -17,6 +17,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.uberdani.R;
 import com.uberdani.channel.NotificationHelper;
 import com.uberdani.receivers.AcceptReceiver;
+import com.uberdani.receivers.CancelReceiver;
 
 import java.util.Map;
 
@@ -67,9 +68,11 @@ public class MyFirebaseMessagingClient extends FirebaseMessagingService {
     }
 
     private void showNotificationActions(String title, String body, String idClient) {
+
+        // ACEPTAR
         Intent acceptIntent = new Intent(this, AcceptReceiver.class);
         acceptIntent.putExtra("idClient", idClient);
-        PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT); //O INMUTABLE
+        PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, acceptIntent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Action acceptAction = new NotificationCompat.Action.Builder(
                 R.mipmap.ic_launcher,
@@ -77,9 +80,21 @@ public class MyFirebaseMessagingClient extends FirebaseMessagingService {
                 acceptPendingIntent
         ).build();
 
+        //CANCELAR
+        Intent cancelIntent = new Intent(this, CancelReceiver.class);
+        cancelIntent.putExtra("idClient", idClient);
+        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, cancelIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Action cancelAction = new NotificationCompat.Action.Builder(
+                R.mipmap.ic_launcher,
+                "Cancelar",
+                cancelPendingIntent
+        ).build();
+
+
         Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationHelper notificationHelper = new NotificationHelper(getBaseContext());
-        NotificationCompat.Builder builder = notificationHelper.getNotificationOldAPIActions(title, body, sound, acceptAction);
+        NotificationCompat.Builder builder = notificationHelper.getNotificationOldAPIActions(title, body, sound, acceptAction, cancelAction);
         notificationHelper.getManager().notify(2, builder.build());
     }
 
@@ -94,19 +109,31 @@ public class MyFirebaseMessagingClient extends FirebaseMessagingService {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void showNotificationApiOreoActions(String title, String body, String idClient) {
+        // ACEPTAR
         Intent acceptIntent = new Intent(this, AcceptReceiver.class);
         acceptIntent.putExtra("idClient", idClient);
-        PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent acceptPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, acceptIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        Notification.Action acceptAction = new Notification.Action.Builder(
+        Notification.Action acceptAction= new Notification.Action.Builder(
                 R.mipmap.ic_launcher,
                 "Aceptar",
                 acceptPendingIntent
         ).build();
 
+        //CANCELAR
+        Intent cancelIntent = new Intent(this, CancelReceiver.class);
+        cancelIntent.putExtra("idClient", idClient);
+        PendingIntent cancelPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_CODE, cancelIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Notification.Action cancelAction= new Notification.Action.Builder(
+                R.mipmap.ic_launcher,
+                "Cancelar",
+                cancelPendingIntent
+        ).build();
+
         Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationHelper notificationHelper = new NotificationHelper(getBaseContext());
-        Notification.Builder builder = notificationHelper.getNotificationActions(title, body, sound, acceptAction);
+        Notification.Builder builder = notificationHelper.getNotificationActions(title, body, sound, acceptAction,cancelAction);
         notificationHelper.getManager().notify(2, builder.build());
     }
 }

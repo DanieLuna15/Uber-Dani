@@ -16,17 +16,35 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UberDani"
         tools:targetApi="32">
+        <activity
+            android:name=".activities.driver.MapDriverBookingActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".activities.client.MapClientBookingActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
 
-        <receiver android:name=".receivers.AcceptReceiver"
+        <receiver
+            android:name=".receivers.AcceptReceiver"
             android:enabled="true"
-            android:exported="true">
-        </receiver>
+            android:exported="true" />
+        <receiver
+            android:name=".receivers.CancelReceiver"
+            android:enabled="true"
+            android:exported="true" />
 
-        <service android:name=".services.MyFirebaseMessagingClient"
+        <service
+            android:name=".services.MyFirebaseMessagingClient"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT">
-                </action>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 

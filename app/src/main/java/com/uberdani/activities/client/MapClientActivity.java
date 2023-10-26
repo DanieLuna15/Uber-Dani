@@ -152,7 +152,7 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         mAuthProvider = new AuthProvider();
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
         //mbtnLogout = findViewById(R.id.btnLogout);
-        mGeofireProvider = new GeofireProvider();
+        mGeofireProvider = new GeofireProvider("active_drivers");
         mTokenProvider = new TokenProvider();
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
