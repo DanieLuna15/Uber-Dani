@@ -12,16 +12,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.airbnb.lottie.L;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -33,17 +36,33 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.SquareCap;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
+import com.uberdani.activities.client.DetailRequestActivity;
 import com.uberdani.providers.AuthProvider;
+import com.uberdani.providers.ClientBookingProvider;
 import com.uberdani.providers.ClientProvider;
 import com.uberdani.providers.GeofireProvider;
+import com.uberdani.providers.GoogleApiProvider;
 import com.uberdani.providers.TokenProvider;
+import com.uberdani.utils.DecodePoints;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapDriverBookingActivity extends AppCompatActivity implements OnMapReadyCallback{
 
@@ -52,6 +71,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
     AuthProvider mAuthProvider;
     private GeofireProvider mGeofireProvider;
     private ClientProvider mClientProvider;
+    private ClientBookingProvider mClientBookingProvider;
     private TokenProvider mTokenProvider;
 
     private LocationRequest mLocationRequest;
@@ -65,8 +85,19 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
 
     private TextView mTextViewClientBooking;
     private TextView mTextViewEmailBooking;
+    private TextView mTextViewOriginClientBooking;
+    private TextView mTextViewDestinationClientBooking;
 
     private String mExtraClientId;
+
+    private LatLng mOriginLatLng;
+    private LatLng mDestinationLatLng;
+
+    private GoogleApiProvider mGoogleApiProvider;
+    private List<LatLng> mPolylineList;
+    private PolylineOptions mPolylineOptions;
+
+    private boolean mIsFirstTime = true;
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -95,6 +126,11 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
                     ));
 
                     updateLocation();
+
+                    if (mIsFirstTime) {
+                        mIsFirstTime = false;
+                        getClientBooking();
+                    }
                 }
             }
         }
@@ -109,6 +145,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mGeofireProvider = new GeofireProvider("drivers_working");
         mTokenProvider = new TokenProvider();
         mClientProvider = new ClientProvider();
+        mClientBookingProvider = new ClientBookingProvider();
 
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
 
@@ -117,12 +154,81 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
 
         mTextViewClientBooking = findViewById(R.id.textViewClientBooking);
         mTextViewEmailBooking = findViewById(R.id.textViewClientEmailBooking);
+        mTextViewOriginClientBooking = findViewById(R.id.textViewOriginClientBooking);
+        mTextViewDestinationClientBooking = findViewById(R.id.textViewDestinationClientBooking);
 
         mExtraClientId = getIntent().getStringExtra("idClient");
-        getClientBooking();
+
+        mGoogleApiProvider = new GoogleApiProvider(MapDriverBookingActivity.this);
+
+        getClient();
     }
 
     private void getClientBooking() {
+        mClientBookingProvider.getClientBooking(mExtraClientId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String destination = snapshot.child("destination").getValue().toString();
+                    String origin = snapshot.child("origin").getValue().toString();
+                    double destinationLat = Double.parseDouble(snapshot.child("destinationLat").getValue().toString());
+                    double destinationLng = Double.parseDouble(snapshot.child("destinationLng").getValue().toString());
+
+                    double originLat = Double.parseDouble(snapshot.child("originLat").getValue().toString());
+                    double originLng = Double.parseDouble(snapshot.child("originLng").getValue().toString());
+                    mOriginLatLng = new LatLng(originLat,originLng);
+                    mDestinationLatLng = new LatLng(destinationLat,destinationLng);
+
+                    mTextViewOriginClientBooking.setText("Recoger en: " + origin);
+                    mTextViewDestinationClientBooking.setText("Destino: " + destination);
+                    mMap.addMarker(new MarkerOptions().position(mOriginLatLng).title("Recoger Aquí").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_pin_red)));
+                    drawRoute();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void drawRoute(){
+        mGoogleApiProvider.getDirections(mCurrentLatLng, mOriginLatLng).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                try{
+                    JSONObject jsonObject = new JSONObject(response.body());
+                    JSONArray jsonArray = jsonObject.getJSONArray("routes");
+                    JSONObject route =jsonArray.getJSONObject(0);
+                    JSONObject polylines = route.getJSONObject("overview_poliline");
+                    String points = polylines.getString("points");
+                    mPolylineList = DecodePoints.decodePoly(points);
+                    mPolylineOptions = new PolylineOptions();
+                    mPolylineOptions.color(Color.DKGRAY);
+                    mPolylineOptions.width(15f);
+                    mPolylineOptions.startCap(new SquareCap());
+                    mPolylineOptions.jointType(JointType.ROUND);
+                    mPolylineOptions.addAll(mPolylineList);
+                    mMap.addPolyline(mPolylineOptions);
+
+                    JSONArray legs = route.getJSONArray("legs");
+                    JSONObject leg = legs.getJSONObject(0);
+                    JSONObject distance = leg.getJSONObject("distance");
+                    JSONObject duration = leg.getJSONObject("duration");
+                    String distanceText = distance.getString("text"); //DESCOMENTAR
+                    String durationText = duration.getString("text"); //DESCOMENTAR
+                }catch(Exception e){
+                    Log.d("Error", "Error encontrado " + e.getMessage());
+                }
+            }
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void getClient() {
         mClientProvider.getClient(mExtraClientId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

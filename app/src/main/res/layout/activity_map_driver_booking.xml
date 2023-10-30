@@ -22,7 +22,8 @@
         </fragment>
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="10dp">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -37,12 +38,34 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textViewOriginClientBooking"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lugar de recogida"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:textSize="16dp">
+                    </TextView>
+
+                    <TextView
+                        android:id="@+id/textViewDestinationClientBooking"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Destino"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
+                        android:textSize="16dp">
+                    </TextView>
+
                     <TextView
                         android:id="@+id/textViewClientBooking"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Nombre del Usuario"
-                        android:layout_margin="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
                         android:textSize="16dp">
                     </TextView>
 
@@ -51,9 +74,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Email del Usuario"
-                        android:layout_margin="10dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="5dp"
                         android:textSize="16dp">
                     </TextView>
+
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
