@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -98,6 +99,10 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
     private PolylineOptions mPolylineOptions;
 
     private boolean mIsFirstTime = true;
+    private boolean mIsCloseToClient = false;
+
+    private Button mBtnStartBooking;
+    private Button mBtnFinishBooking;
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -157,11 +162,55 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mTextViewOriginClientBooking = findViewById(R.id.textViewOriginClientBooking);
         mTextViewDestinationClientBooking = findViewById(R.id.textViewDestinationClientBooking);
 
+        mBtnStartBooking = findViewById(R.id.btnStartBooking);
+        mBtnFinishBooking = findViewById(R.id.btnFinishBooking);
+
         mExtraClientId = getIntent().getStringExtra("idClient");
 
         mGoogleApiProvider = new GoogleApiProvider(MapDriverBookingActivity.this);
 
         getClient();
+
+        mBtnStartBooking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mIsCloseToClient){
+                    startBooking();
+                }
+                else{
+                    Toast.makeText(MapDriverBookingActivity.this, "Debes estar más cerca a la Posición de Recogida para iniciar el viaje", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        mBtnFinishBooking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finishBooking();
+            }
+        });
+    }
+
+    private void finishBooking() {
+        mClientBookingProvider.updateStatus(mExtraClientId, "finish");
+    }
+
+    private void startBooking() {
+        mClientBookingProvider.updateStatus(mExtraClientId, "start");
+        mBtnStartBooking.setVisibility(View.GONE);
+        mBtnFinishBooking.setVisibility(View.VISIBLE);
+    }
+
+    private double getDistanceBetween(LatLng clientLatLng, LatLng driverLatLng){
+        double distance = 0;
+        Location clientLocation = new Location("");
+        Location driverLocation = new Location("");
+        clientLocation.setLatitude(clientLatLng.latitude);
+        clientLocation.setLongitude(clientLatLng.longitude);
+        driverLocation.setLatitude(driverLatLng.latitude);
+        driverLocation.setLongitude(driverLatLng.longitude);
+        distance = clientLocation.distanceTo(driverLocation);
+        return distance;
     }
 
     private void getClientBooking() {
@@ -250,6 +299,16 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
     private void updateLocation() {
         if (mAuthProvider.existSession() && mCurrentLatLng != null) {
             mGeofireProvider.saveLocation(mAuthProvider.getId(), mCurrentLatLng);
+            if(!mIsCloseToClient){
+                if(mOriginLatLng != null && mCurrentLatLng != null){
+                    double distance = getDistanceBetween(mOriginLatLng, mCurrentLatLng); //retorno en metros
+                    if(distance <= 200){
+                        //mBtnStartBooking.setEnabled(true);
+                        mIsCloseToClient = true;
+                        Toast.makeText(this, "Estás cerca a la posición de recogida!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
         }
     }
 

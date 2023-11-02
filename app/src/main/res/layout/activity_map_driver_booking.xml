@@ -8,6 +8,28 @@
     android:layout_height="match_parent"
     tools:context=".activities.driver.MapDriverBookingActivity">
 
+
+    <Button
+        android:id="@+id/btnStartBooking"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="INICIAR VIAJE"
+        android:background="@drawable/rounded_button"
+        android:backgroundTint="@color/purple_500"
+        android:textColor="@color/white"
+        android:layout_margin="30dp">
+    </Button>
+    <Button
+        android:id="@+id/btnFinishBooking"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Finalizar VIAJE"
+        android:background="@drawable/rounded_button"
+        android:backgroundTint="@color/purple_700"
+        android:textColor="@color/white"
+        android:layout_margin="30dp"
+        android:visibility="gone">
+    </Button>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

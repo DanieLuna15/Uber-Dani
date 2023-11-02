@@ -138,15 +138,6 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
             }
         });
 
-        /*mbtnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mAuthProvider.logout();
-                Intent intent = new Intent(MapDriverActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });*/
         generateToken();
         isDriverWorking();
     }
@@ -193,6 +184,19 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
             Toast.makeText(this, "No te puedes Desconectar", Toast.LENGTH_SHORT).show();
         }
     }
+
+    /*private void disconnect() {
+
+        if (mFusedLocation != null) {
+            mFusedLocation.removeLocationUpdates(mLocationCallback);
+            if (mAuthProvider.existSession()) {
+                mGeofireProvider.removeLocation(mAuthProvider.getId());
+            }
+        }
+        else {
+            Toast.makeText(this, "No te puedes desconectar", Toast.LENGTH_SHORT).show();
+        }
+    }*/
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
