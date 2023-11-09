@@ -1,22 +1,17 @@
 package com.uberdani.activities.client;
 
-import static java.sql.DriverManager.getDriver;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-import com.airbnb.lottie.L;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,14 +25,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
+import com.uberdani.activities.driver.CalificationClientActivity;
 import com.uberdani.activities.driver.MapDriverBookingActivity;
-import com.uberdani.models.Driver;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.ClientBookingProvider;
 import com.uberdani.providers.DriverProvider;
@@ -49,7 +42,6 @@ import com.uberdani.utils.DecodePoints;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -82,6 +74,7 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
     private TextView mTextViewDriverEmailBooking;
     private TextView mTextViewOriginClientBooking;
     private TextView mTextViewDestinationClientBooking;
+    private TextView mTextViewStatusBooking;
 
     private GoogleApiProvider mGoogleApiProvider;
     private List<LatLng> mPolylineList;
@@ -89,6 +82,8 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
 
     private ValueEventListener mListener;
     private String mIdDriver;
+    private ValueEventListener mListenerStatus;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,8 +108,51 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
         mTextViewDriverEmailBooking = findViewById(R.id.textViewDriverEmailBooking);
         mTextViewOriginClientBooking = findViewById(R.id.textViewOriginClientBooking);
         mTextViewDestinationClientBooking = findViewById(R.id.textViewDestinationClientBooking);
-
+        mTextViewStatusBooking = findViewById(R.id.textViewStatusBooking);
+        
+        getStatus();
         getClientBooking();
+    }
+
+    private void getStatus() {
+        mListenerStatus = mClientBookingProvider.getStatus(mAuthProvider.getId()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String status = snapshot.getValue().toString();
+                    mTextViewStatusBooking.setText(status);
+                    if(status.equals("accept")){
+                        mTextViewStatusBooking.setText("Estado: Aceptado");
+                    }
+                    if(status.equals("start")) {
+                        mTextViewStatusBooking.setText("Estado: Viaje Iniciado");
+                        startBooking();
+                    }
+                    else if(status.equals("finish")){
+                        mTextViewStatusBooking.setText("Estado: Viaje Finalizado");
+                        finishBooking();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void finishBooking() {
+        Intent intent = new Intent(MapClientBookingActivity.this, CalificationDriverActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void startBooking() {
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(mDestinationLatLng).title("Destino").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_pin_blue)));
+
+        drawRoute(mDestinationLatLng);
     }
 
     @Override
@@ -122,6 +160,9 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
         super.onDestroy();
         if(mListener != null){
             mGeofireProvider.getDriverLocation(mIdDriver).removeEventListener(mListener);
+        }
+        if(mListenerStatus != null){
+            mClientBookingProvider.getStatus(mAuthProvider.getId()).removeEventListener(mListenerStatus);
         }
     }
 
@@ -199,7 +240,7 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
                                         .zoom(16f)
                                         .build()
                         ));
-                        drawRoute();
+                        drawRoute(mOriginLatLng);
                     }
                 }
             }
@@ -211,8 +252,8 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
         });
     }
 
-    private void drawRoute(){
-        mGoogleApiProvider.getDirections(mDriverLatLng, mOriginLatLng).enqueue(new Callback<String>() {
+    private void drawRoute(LatLng LatLng){
+        mGoogleApiProvider.getDirections(mDriverLatLng, LatLng).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 try{

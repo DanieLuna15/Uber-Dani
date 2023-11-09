@@ -4,8 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -15,10 +13,7 @@ import android.widget.Toast;
 import com.airbnb.lottie.LottieAnimationView;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQueryEventListener;
-import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -36,13 +31,9 @@ import com.uberdani.providers.NotificationProvider;
 import com.uberdani.providers.TokenProvider;
 import com.uberdani.utils.DecodePoints;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.internal.cache.DiskLruCache;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

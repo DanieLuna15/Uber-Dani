@@ -25,7 +25,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.airbnb.lottie.L;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -47,7 +46,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
-import com.uberdani.activities.client.DetailRequestActivity;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.ClientBookingProvider;
 import com.uberdani.providers.ClientProvider;
@@ -193,12 +191,18 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
 
     private void finishBooking() {
         mClientBookingProvider.updateStatus(mExtraClientId, "finish");
+        Intent intent = new Intent(MapDriverBookingActivity.this, CalificationClientActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void startBooking() {
         mClientBookingProvider.updateStatus(mExtraClientId, "start");
         mBtnStartBooking.setVisibility(View.GONE);
         mBtnFinishBooking.setVisibility(View.VISIBLE);
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions().position(mDestinationLatLng).title("Destino").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_pin_blue)));
+        drawRoute(mDestinationLatLng);
     }
 
     private double getDistanceBetween(LatLng clientLatLng, LatLng driverLatLng){
@@ -231,7 +235,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
                     mTextViewOriginClientBooking.setText("Recoger en: " + origin);
                     mTextViewDestinationClientBooking.setText("Destino: " + destination);
                     mMap.addMarker(new MarkerOptions().position(mOriginLatLng).title("Recoger Aquí").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_pin_red)));
-                    drawRoute();
+                    drawRoute(mOriginLatLng);
                 }
             }
             @Override
@@ -241,8 +245,8 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         });
     }
 
-    private void drawRoute(){
-        mGoogleApiProvider.getDirections(mCurrentLatLng, mOriginLatLng).enqueue(new Callback<String>() {
+    private void drawRoute(LatLng latLng){
+        mGoogleApiProvider.getDirections(mCurrentLatLng, latLng).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 try{
