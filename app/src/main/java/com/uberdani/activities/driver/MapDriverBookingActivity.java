@@ -202,7 +202,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
 
     private void finishBooking() {
         mClientBookingProvider.updateStatus(mExtraClientId, "finish");
-        //mClientBookingProvider.updateIdHistoryBooking(mExtraClientId);
+        mClientBookingProvider.updateIdHistoryBooking(mExtraClientId);
         sendNotification("Viaje Finalizado");
         if(mFusedLocation!=null) {
             mFusedLocation.removeLocationUpdates(mLocationCallback);
@@ -210,6 +210,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mGeofireProvider.removeLocation(mAuthProvider.getId());
         disconnect();
         Intent intent = new Intent(MapDriverBookingActivity.this, CalificationClientActivity.class);
+        intent.putExtra("idClient", mExtraClientId);
         startActivity(intent);
         finish();
     }
