@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,6 +25,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,6 +34,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
 import com.uberdani.activities.driver.CalificationClientActivity;
 import com.uberdani.activities.driver.MapDriverBookingActivity;
+import com.uberdani.models.ClientBooking;
+import com.uberdani.models.FCMBody;
+import com.uberdani.models.FCMResponse;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.ClientBookingProvider;
 import com.uberdani.providers.DriverProvider;
@@ -42,7 +48,9 @@ import com.uberdani.utils.DecodePoints;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;

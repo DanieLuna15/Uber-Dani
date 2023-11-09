@@ -42,22 +42,31 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
+import com.uberdani.activities.client.RequestDriverActivity;
+import com.uberdani.models.ClientBooking;
+import com.uberdani.models.FCMBody;
+import com.uberdani.models.FCMResponse;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.ClientBookingProvider;
 import com.uberdani.providers.ClientProvider;
 import com.uberdani.providers.GeofireProvider;
 import com.uberdani.providers.GoogleApiProvider;
+import com.uberdani.providers.NotificationProvider;
 import com.uberdani.providers.TokenProvider;
 import com.uberdani.utils.DecodePoints;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,6 +81,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
     private ClientProvider mClientProvider;
     private ClientBookingProvider mClientBookingProvider;
     private TokenProvider mTokenProvider;
+    private NotificationProvider mNotificationProvider;
 
     private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mFusedLocation;
@@ -149,6 +159,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mTokenProvider = new TokenProvider();
         mClientProvider = new ClientProvider();
         mClientBookingProvider = new ClientBookingProvider();
+        mNotificationProvider = new NotificationProvider();
 
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
 
@@ -191,6 +202,13 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
 
     private void finishBooking() {
         mClientBookingProvider.updateStatus(mExtraClientId, "finish");
+        //mClientBookingProvider.updateIdHistoryBooking(mExtraClientId);
+        sendNotification("Viaje Finalizado");
+        if(mFusedLocation!=null) {
+            mFusedLocation.removeLocationUpdates(mLocationCallback);
+        }
+        mGeofireProvider.removeLocation(mAuthProvider.getId());
+        disconnect();
         Intent intent = new Intent(MapDriverBookingActivity.this, CalificationClientActivity.class);
         startActivity(intent);
         finish();
@@ -203,6 +221,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mMap.clear();
         mMap.addMarker(new MarkerOptions().position(mDestinationLatLng).title("Destino").icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_pin_blue)));
         drawRoute(mDestinationLatLng);
+        sendNotification("Viaje Iniciado");
     }
 
     private double getDistanceBetween(LatLng clientLatLng, LatLng driverLatLng){
@@ -441,4 +460,47 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         }
         return isActive;
     }
+
+    private void sendNotification(final String status) {
+        mTokenProvider.getToken(mExtraClientId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String token = snapshot.child("token").getValue().toString();
+                    Map<String, String> map = new HashMap<>();
+                    map.put("title", "ESTADO DE TU VIAJE:");
+                    map.put("body",
+                            "El estado de tu viaje es: " + status
+                    );
+                    FCMBody fcmBody = new FCMBody(token,"high", "4500s",map);
+                    mNotificationProvider.sendNotification(fcmBody).enqueue(new Callback<FCMResponse>() {
+                        @Override
+                        public void onResponse(Call<FCMResponse> call, Response<FCMResponse> response) {
+                            if(response.body()!=null){
+                                if(response.body().getSuccess() != 1){
+                                    Toast.makeText(MapDriverBookingActivity.this, "No se pudo enviar la notificación", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                            else{
+                                Toast.makeText(MapDriverBookingActivity.this, "No se pudo enviar la notificación", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<FCMResponse> call, Throwable t) {
+                            Log.d("Error","Error " + t.getMessage());
+                        }
+                    });
+                }
+                else{
+                    Toast.makeText(MapDriverBookingActivity.this, "No se pudo enviar la notificación porque el conductor no tiene un token de sesión", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
 }

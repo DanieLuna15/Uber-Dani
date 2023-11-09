@@ -33,5 +33,4 @@ public class ClientBookingProvider {
     public DatabaseReference getClientBooking(String idClientBooking){
         return mDatabase.child(idClientBooking);
     }
-
 }
