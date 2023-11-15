@@ -188,10 +188,14 @@ public class RequestDriverActivity extends AppCompatActivity {
                     map.put("body",
                             "Un cliente esta solicitando un servicio a una distancia de: " + km + "\n" +
                                     "Recoger en: " + mExtraOrigin + "\n" +
-                                    "Destino: " + mExtraDestination + "\n" +
-                                    "ID user: " + mAuthProvider.getId()
+                                    "Destino: " + mExtraDestination + "\n" /*+
+                                    "ID user: " + mAuthProvider.getId()*/
                             );
                     map.put("idClient", mAuthProvider.getId());
+                    map.put("origin", mExtraOrigin);
+                    map.put("destination", mExtraDestination);
+                    map.put("min", time);
+                    map.put("distance", km);
                     FCMBody fcmBody = new FCMBody(token,"high", "4500s",map);
                     mNotificationProvider.sendNotification(fcmBody).enqueue(new Callback<FCMResponse>() {
                         @Override

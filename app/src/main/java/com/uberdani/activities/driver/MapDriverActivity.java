@@ -137,6 +137,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
                 }
             }
         });
+        // disconnect(); // probar
 
         generateToken();
         isDriverWorking();
