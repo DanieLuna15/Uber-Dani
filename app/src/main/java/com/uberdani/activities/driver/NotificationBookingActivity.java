@@ -1,5 +1,6 @@
 package com.uberdani.activities.driver;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.NotificationManager;
@@ -13,7 +14,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.ClientBookingProvider;
@@ -56,6 +61,7 @@ public class NotificationBookingActivity extends AppCompatActivity {
             }
         }
     };
+    private ValueEventListener mListener;
 
     private void initTimer() {
         mHandler = new Handler();
@@ -89,6 +95,8 @@ public class NotificationBookingActivity extends AppCompatActivity {
         mMediaPlayer = MediaPlayer.create(this, R.raw.ringtone);
         mMediaPlayer.setLooping(true);
 
+        mClientBookingProvider = new ClientBookingProvider();
+
         getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
@@ -97,6 +105,7 @@ public class NotificationBookingActivity extends AppCompatActivity {
         );
 
         initTimer();
+        checkIfClientCancelBooking();
 
         mBtnCAcceptBooking.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,9 +122,27 @@ public class NotificationBookingActivity extends AppCompatActivity {
         });
     }
 
+    private void checkIfClientCancelBooking(){
+        mListener = mClientBookingProvider.getClientBooking(mExtraIdClient).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
+                    Toast.makeText(NotificationBookingActivity.this, "El cliente canceló el viaje.", Toast.LENGTH_LONG).show();
+                    if(mHandler != null) mHandler.removeCallbacks(runnable);
+                    Intent intent = new Intent(NotificationBookingActivity.this, MapDriverActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
     private void cancelBooking() {
         if(mHandler != null) mHandler.removeCallbacks(runnable);
-        mClientBookingProvider = new ClientBookingProvider();
         mClientBookingProvider.updateStatus(mExtraIdClient, "cancel");
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -187,6 +214,9 @@ public class NotificationBookingActivity extends AppCompatActivity {
             if(mMediaPlayer.isPlaying()){
                 mMediaPlayer.pause();
             }
+        }
+        if(mListener != null){
+            mClientBookingProvider.getClientBooking(mExtraIdClient).removeEventListener(mListener);
         }
     }
 }

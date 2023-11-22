@@ -205,7 +205,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mClientBookingProvider.updateIdHistoryBooking(mExtraClientId);
         sendNotification("Viaje Finalizado");
 
-        disconnect();
+        //disconnect();
         if(mFusedLocation!=null) {
             mFusedLocation.removeLocationUpdates(mLocationCallback);
         }
