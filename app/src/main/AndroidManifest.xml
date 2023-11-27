@@ -19,6 +19,14 @@
         android:theme="@style/Theme.UberDani"
         tools:targetApi="32">
         <activity
+            android:name=".activities.driver.UpdateProfileDriverActivity"
+            android:exported="false"
+            android:parentActivityName=".activities.driver.MapDriverActivity">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".activities.client.UpdateProfileActivity"
             android:exported="false"
             android:parentActivityName=".activities.client.MapClientActivity">

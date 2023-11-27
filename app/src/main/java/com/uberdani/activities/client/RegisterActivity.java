@@ -90,7 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
                 mProgressDialog.hide();
                 if(task.isSuccessful()){
                     String id = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    Client client = new Client(id,name,email,"");
+                    Client client = new Client(id,name,email);
                     create(client);
                 }
                 else{

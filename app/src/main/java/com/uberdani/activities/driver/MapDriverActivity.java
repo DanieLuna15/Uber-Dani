@@ -48,6 +48,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.uberdani.R;
 import com.uberdani.activities.MainActivity;
 import com.uberdani.activities.client.MapClientActivity;
+import com.uberdani.activities.client.UpdateProfileActivity;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.GeofireProvider;
@@ -326,6 +327,10 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId() == R.id.action_logout){
             logout();
+        }
+        if(item.getItemId() == R.id.action_update){
+            Intent intent = new Intent(MapDriverActivity.this, UpdateProfileDriverActivity.class);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

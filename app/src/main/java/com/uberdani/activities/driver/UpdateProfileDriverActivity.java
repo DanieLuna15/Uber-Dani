@@ -1,4 +1,4 @@
-package com.uberdani.activities.client;
+package com.uberdani.activities.driver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,23 +27,27 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.uberdani.R;
+import com.uberdani.activities.client.UpdateProfileActivity;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.models.Client;
+import com.uberdani.models.Driver;
 import com.uberdani.providers.AuthProvider;
 import com.uberdani.providers.ClientProvider;
+import com.uberdani.providers.DriverProvider;
 import com.uberdani.providers.ImagesProvider;
 import com.uberdani.utils.CompressorBitmapImage;
 import com.uberdani.utils.FileUtil;
 
 import java.io.File;
 
-public class UpdateProfileActivity extends AppCompatActivity {
-
+public class UpdateProfileDriverActivity extends AppCompatActivity {
     private ImageView mImageViewProfile;
     private Button mBtnUpdate;
     private TextView mTextViewName;
+    private TextView mTextViewBrandVehicle;
+    private TextView mTextViewPlateVehicle;
 
-    private ClientProvider mClientProvider;
+    private DriverProvider mDriverProvider;
     private AuthProvider mAuthProvider;
     private ImagesProvider mImagesProvider;
 
@@ -52,23 +57,28 @@ public class UpdateProfileActivity extends AppCompatActivity {
     private final int GALLERY_REQUEST = 1;
     private ProgressDialog mProgressDialog;
     private String mName;
+    private String mVehicleBrand;
+    private String mVehiclePlate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_update_profile);
+        setContentView(R.layout.activity_update_profile_driver);
 
         MyToolBar.show(this, "Actualizar Perfil", true);
         mImageViewProfile = findViewById(R.id.imageViewProfile);
         mBtnUpdate = findViewById(R.id.btnUpdateProfile);
         mTextViewName = findViewById(R.id.textInputName);
+        mTextViewBrandVehicle = findViewById(R.id.textInputVehicleBrand);
+        mTextViewPlateVehicle = findViewById(R.id.textInputVehiclePlate);
 
-        mClientProvider = new ClientProvider();
+        mDriverProvider = new DriverProvider();
         mAuthProvider = new AuthProvider();
-        mImagesProvider = new ImagesProvider("client_images");
-        mProgressDialog = new ProgressDialog(UpdateProfileActivity.this);
+        mImagesProvider = new ImagesProvider("driver_images");
 
-        getClientInfo();
+        mProgressDialog = new ProgressDialog(UpdateProfileDriverActivity.this);
+
+        getDriverInfo();
 
         mImageViewProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,13 +114,17 @@ public class UpdateProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void getClientInfo(){
-        mClientProvider.getClient(mAuthProvider.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void getDriverInfo(){
+        mDriverProvider.getDriver(mAuthProvider.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     String name = snapshot.child("name").getValue().toString();
+                    String vehicleBrand = snapshot.child("vehiclebrand").getValue().toString();
+                    String vehiclePlate = snapshot.child("vehicleplate").getValue().toString();
                     mTextViewName.setText(name);
+                    mTextViewBrandVehicle.setText(vehicleBrand);
+                    mTextViewPlateVehicle.setText(vehiclePlate);
                 }
             }
 
@@ -123,6 +137,8 @@ public class UpdateProfileActivity extends AppCompatActivity {
 
     private void updateProfile() {
         mName = mTextViewName.getText().toString();
+        mVehicleBrand = mTextViewBrandVehicle.getText().toString();
+        mVehiclePlate = mTextViewPlateVehicle.getText().toString();
         if(!mName.equals("") && mImageFile != null){
             mProgressDialog.setMessage("Espere un momento...");
             mProgressDialog.setCanceledOnTouchOutside(false);
@@ -131,12 +147,12 @@ public class UpdateProfileActivity extends AppCompatActivity {
             saveImage();
         }
         else{
-            Toast.makeText(UpdateProfileActivity.this, "Ingresa la imagen y el nombre", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UpdateProfileDriverActivity.this, "Ingresa la imagen y el nombre", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void saveImage() {
-        mImagesProvider.saveImage(UpdateProfileActivity.this, mImageFile, mAuthProvider.getId()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+        mImagesProvider.saveImage(UpdateProfileDriverActivity.this,mImageFile,mAuthProvider.getId()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -144,22 +160,24 @@ public class UpdateProfileActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(Uri uri) {
                             String image = uri.toString();
-                            Client client = new Client();
-                            client.setImage(image);
-                            client.setName(mName);
-                            client.setId(mAuthProvider.getId());
-                            mClientProvider.update(client).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            Driver driver = new Driver();
+                            driver.setImage(image);
+                            driver.setName(mName);
+                            driver.setId(mAuthProvider.getId());
+                            driver.setVehicleBrand(mVehicleBrand);
+                            driver.setVehiclePlate(mVehiclePlate);
+                            mDriverProvider.update(driver).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     mProgressDialog.dismiss();
-                                    Toast.makeText(UpdateProfileActivity.this, "Su informacion se actualizo correctamente", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(UpdateProfileDriverActivity.this, "Su informacion se actualizo correctamente", Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
                     });
                 }
                 else{
-                    Toast.makeText(UpdateProfileActivity.this, "Ocurrió un error al subir la imagen.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(UpdateProfileDriverActivity.this, "Ocurrió un error al subir la imagen.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
