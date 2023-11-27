@@ -26,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 import com.uberdani.R;
 import com.uberdani.activities.client.UpdateProfileActivity;
 import com.uberdani.includes.MyToolBar;
@@ -122,6 +123,11 @@ public class UpdateProfileDriverActivity extends AppCompatActivity {
                     String name = snapshot.child("name").getValue().toString();
                     String vehicleBrand = snapshot.child("vehiclebrand").getValue().toString();
                     String vehiclePlate = snapshot.child("vehicleplate").getValue().toString();
+                    String image = "";
+                    if(snapshot.hasChild("image")){
+                        image = snapshot.child("image").getValue().toString();
+                        Picasso.with(UpdateProfileDriverActivity.this).load(image).into(mImageViewProfile);
+                    }
                     mTextViewName.setText(name);
                     mTextViewBrandVehicle.setText(vehicleBrand);
                     mTextViewPlateVehicle.setText(vehiclePlate);

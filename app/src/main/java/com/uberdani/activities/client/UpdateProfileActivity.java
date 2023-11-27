@@ -25,7 +25,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 import com.uberdani.R;
+import com.uberdani.activities.driver.MapDriverBookingActivity;
 import com.uberdani.includes.MyToolBar;
 import com.uberdani.models.Client;
 import com.uberdani.providers.AuthProvider;
@@ -110,6 +112,11 @@ public class UpdateProfileActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     String name = snapshot.child("name").getValue().toString();
+                    String image = "";
+                    if(snapshot.hasChild("image")){
+                        image = snapshot.child("image").getValue().toString();
+                        Picasso.with(UpdateProfileActivity.this).load(image).into(mImageViewProfile);
+                    }
                     mTextViewName.setText(name);
                 }
             }

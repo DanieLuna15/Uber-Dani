@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ import com.google.android.libraries.places.api.Places;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 import com.uberdani.R;
 import com.uberdani.activities.driver.CalificationClientActivity;
 import com.uberdani.activities.driver.MapDriverBookingActivity;
@@ -84,6 +86,8 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
     private TextView mTextViewDestinationClientBooking;
     private TextView mTextViewStatusBooking;
 
+    private ImageView mImageViewClientBooking;
+
     private GoogleApiProvider mGoogleApiProvider;
     private List<LatLng> mPolylineList;
     private PolylineOptions mPolylineOptions;
@@ -117,6 +121,7 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
         mTextViewOriginClientBooking = findViewById(R.id.textViewOriginClientBooking);
         mTextViewDestinationClientBooking = findViewById(R.id.textViewDestinationClientBooking);
         mTextViewStatusBooking = findViewById(R.id.textViewStatusBooking);
+        mImageViewClientBooking = findViewById(R.id.imageViewClientBooking);
         
         getStatus();
         getClientBooking();
@@ -213,6 +218,11 @@ public class MapClientBookingActivity extends AppCompatActivity implements OnMap
                 if(snapshot.exists()){
                     String name = snapshot.child("name").getValue().toString();
                     String email = snapshot.child("email").getValue().toString();
+                    String image = "";
+                    if(snapshot.hasChild("image")){
+                        image = snapshot.child("image").getValue().toString();
+                        Picasso.with(MapClientBookingActivity.this).load(image).into(mImageViewClientBooking);
+                    }
                     mTextViewDriverBooking.setText(name);
                     mTextViewDriverEmailBooking.setText(email);
                 }

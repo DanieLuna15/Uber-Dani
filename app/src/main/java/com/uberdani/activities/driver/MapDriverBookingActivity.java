@@ -22,6 +22,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +48,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 import com.uberdani.R;
 import com.uberdani.activities.client.RequestDriverActivity;
 import com.uberdani.models.ClientBooking;
@@ -96,6 +98,8 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
     private TextView mTextViewEmailBooking;
     private TextView mTextViewOriginClientBooking;
     private TextView mTextViewDestinationClientBooking;
+
+    private ImageView mImageViewClientBooking;
 
     private String mExtraClientId;
 
@@ -170,6 +174,7 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
         mTextViewEmailBooking = findViewById(R.id.textViewClientEmailBooking);
         mTextViewOriginClientBooking = findViewById(R.id.textViewOriginClientBooking);
         mTextViewDestinationClientBooking = findViewById(R.id.textViewDestinationClientBooking);
+        mImageViewClientBooking = findViewById(R.id.imageViewClientBooking);
 
         mBtnStartBooking = findViewById(R.id.btnStartBooking);
         mBtnFinishBooking = findViewById(R.id.btnFinishBooking);
@@ -310,6 +315,11 @@ public class MapDriverBookingActivity extends AppCompatActivity implements OnMap
                 if(snapshot.exists()){
                     String name = snapshot.child("name").getValue().toString();
                     String email = snapshot.child("email").getValue().toString();
+                    String image = "";
+                    if(snapshot.hasChild("image")){
+                        image = snapshot.child("image").getValue().toString();
+                        Picasso.with(MapDriverBookingActivity.this).load(image).into(mImageViewClientBooking);
+                    }
                     mTextViewClientBooking.setText(name);
                     mTextViewEmailBooking.setText(email);
                 }
