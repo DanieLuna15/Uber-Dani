@@ -8,6 +8,12 @@
         app:showAsAction="never">
     </item>
 
+    <item android:id="@+id/action_update"
+        android:iconTint="@color/purple_500"
+        android:title="Editar Perfil"
+        app:showAsAction="never">
+    </item>
+
     <item android:id="@+id/action_1"
         android:iconTint="@color/purple_500"
         android:title="Ver conductores"

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -36,7 +37,9 @@ public class LoginActivity extends AppCompatActivity {
     DatabaseReference mDatabase;
 
     SharedPreferences mPref;
-    AlertDialog mDialog;
+
+    ProgressDialog mProgressDialog;
+    String type;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,14 +51,22 @@ public class LoginActivity extends AppCompatActivity {
         mtextInputPassword = findViewById(R.id.textInputPassword);
         mbtnLogin = findViewById(R.id.btnLogin);
 
-        mDialog = new SpotsDialog.Builder(LoginActivity.this).setTitle("Accediendo").setMessage("Aguarde por favor.").create();
+        mProgressDialog = new ProgressDialog(LoginActivity.this);
 
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         mPref = getApplicationContext().getSharedPreferences("typeuser",MODE_PRIVATE);
+
         String selectedUser = mPref.getString("user","");
-        //Toast.makeText(this, "El valor que seleccionó fue: " + selectedUser, Toast.LENGTH_SHORT).show();
+
+        if(selectedUser.equals("client")) {
+            type = "Cliente";
+        } else {
+            type = "Conductor";
+        }
+
+        Toast.makeText(this, "Ahora ingresarás como: " + type, Toast.LENGTH_SHORT).show();
 
         mbtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +81,10 @@ public class LoginActivity extends AppCompatActivity {
         String password = mtextInputPassword.getText().toString();
         if(!email.isEmpty() && !password.isEmpty()) {
             if (password.length() >= 8){
-                mDialog.show();
+                mProgressDialog.setTitle("Accediendo");
+                mProgressDialog.setMessage("Aguarde por favor...");
+                mProgressDialog.setCanceledOnTouchOutside(false);
+                mProgressDialog.show();
                 mAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -88,14 +102,14 @@ public class LoginActivity extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         }else{
-                            Toast.makeText(LoginActivity.this, "La contraseña o el correo son incorrectos", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "La contraseña o el correo son incorrectos.", Toast.LENGTH_SHORT).show();
                         }
-                        mDialog.dismiss();
+                        mProgressDialog.dismiss();
                     }
                 });
             }
             else{
-                Toast.makeText(this, "la contraseña debe tener como mínimo 8 caracteres", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "la contraseña debe tener como mínimo 8 caracteres.", Toast.LENGTH_SHORT).show();
             }
         }
         else{

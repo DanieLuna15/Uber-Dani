@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -31,7 +32,7 @@ public class RegisterDriverActivity extends AppCompatActivity {
 
     AuthProvider mAuthProvider;
     DriverProvider mDriverProvider;
-    AlertDialog mDialog;
+    ProgressDialog mProgressDialog;
     TextInputEditText mtextInputName, mtextInputEmail, mtextInputPassword, mtextInputVehicleBrand, mtextInputVehiclePlate;
     Button mbtnRegister;
 
@@ -45,7 +46,7 @@ public class RegisterDriverActivity extends AppCompatActivity {
         mAuthProvider = new AuthProvider();
         mDriverProvider = new DriverProvider();
 
-        mDialog = new SpotsDialog.Builder(RegisterDriverActivity.this).setTitle("Registrando").setMessage("Aguarde por favor.").create();
+        mProgressDialog = new ProgressDialog(RegisterDriverActivity.this);
 
         mtextInputName = findViewById(R.id.textInputName);
         mtextInputEmail = findViewById(R.id.textInputEmail);
@@ -73,7 +74,10 @@ public class RegisterDriverActivity extends AppCompatActivity {
         if(!name.isEmpty() && !email.isEmpty() && !vehiclebrand.isEmpty() && !vehicleplate.isEmpty() && !password.isEmpty()){
             if(password.length() >= 8){
                 register(name,email,password,vehiclebrand,vehicleplate);
-                mDialog.show();
+                mProgressDialog.setTitle("Registrando");
+                mProgressDialog.setMessage("Aguarde por favor...");
+                mProgressDialog.setCanceledOnTouchOutside(false);
+                mProgressDialog.show();
             }
             else{
                 Toast.makeText(this, "La contraseña debe tener almenos 8 caracteres", Toast.LENGTH_SHORT).show();
@@ -87,14 +91,14 @@ public class RegisterDriverActivity extends AppCompatActivity {
         mAuthProvider.register(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                mDialog.hide();
+                mProgressDialog.hide();
                 if(task.isSuccessful()){
                     String id = FirebaseAuth.getInstance().getCurrentUser().getUid();
                     Driver driver = new Driver(id, name, email, vehiclebrand, vehicleplate );
                     create(driver);
                 }
                 else{
-                    Toast.makeText(RegisterDriverActivity.this, "No se pudo registrar al usuario :(", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterDriverActivity.this, "No se pudo registrar al usuario, por favor revise su conexión a internet.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -109,7 +113,7 @@ public class RegisterDriverActivity extends AppCompatActivity {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }else{
-                    Toast.makeText(RegisterDriverActivity.this, "Algo salió mal :(", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterDriverActivity.this, "Algo salió mal, por favor revise su conexión a internet.", Toast.LENGTH_SHORT).show();
                 }
             }
         });

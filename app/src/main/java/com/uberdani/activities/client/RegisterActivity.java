@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -30,7 +31,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     AuthProvider mAuthProvider;
     ClientProvider mClientProvider;
-    AlertDialog mDialog;
+    ProgressDialog mProgressDialog;
     TextInputEditText mtextInputName;
     TextInputEditText mtextInputEmail;
     TextInputEditText mtextInputPassword;
@@ -45,8 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
         mAuthProvider = new AuthProvider();
         mClientProvider = new ClientProvider();
 
-
-        mDialog = new SpotsDialog.Builder(RegisterActivity.this).setTitle("Registrando").setMessage("Aguarde por favor.").create();
+        mProgressDialog = new ProgressDialog(RegisterActivity.this);
 
         mtextInputName = findViewById(R.id.textInputName);
         mtextInputEmail = findViewById(R.id.textInputEmail);
@@ -70,7 +70,10 @@ public class RegisterActivity extends AppCompatActivity {
         if(!name.isEmpty() && !email.isEmpty() && !password.isEmpty()){
             if(password.length() >= 6){
                 register(name,email,password);
-                mDialog.show();
+                mProgressDialog.setTitle("Registrando");
+                mProgressDialog.setMessage("Aguarde por favor...");
+                mProgressDialog.setCanceledOnTouchOutside(false);
+                mProgressDialog.show();
             }
             else{
                 Toast.makeText(this, "La contraseña debe tener almenos 8 caracteres", Toast.LENGTH_SHORT).show();
@@ -84,14 +87,14 @@ public class RegisterActivity extends AppCompatActivity {
         mAuthProvider.register(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
-                mDialog.hide();
+                mProgressDialog.hide();
                 if(task.isSuccessful()){
                     String id = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                    Client client = new Client(id, name,email);
+                    Client client = new Client(id,name,email,"");
                     create(client);
                 }
                 else{
-                    Toast.makeText(RegisterActivity.this, "No se pudo registrar al usuario :(", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "No se pudo registrar al usuario, por favor revise su conexión a internet.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -106,40 +109,9 @@ public class RegisterActivity extends AppCompatActivity {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }else{
-                    Toast.makeText(RegisterActivity.this, "Algo salió mal :(", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Algo salió mal, por favor revise su conexión a internet.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
-
-    /*private void saveUser(String id, String name, String email) {
-        String selectedUser = mPref.getString("user","");
-        User user = new User();
-        user.setEmail(email);
-        user.setName(name);
-
-        if(selectedUser.equals("driver")){
-            mDatabase.child("Users").child("Drivers").child(id).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
-                        Toast.makeText(RegisterActivity.this, "Registro de Conductor exitoso! ya puede iniciar sesión", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(RegisterActivity.this, "Algo salió mal :(", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        }else if(selectedUser.equals("client")){
-            mDatabase.child("Users").child("Clients").child(id).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()){
-                        Toast.makeText(RegisterActivity.this, "Registro de Cliente exitoso! ya puede iniciar sesión", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(RegisterActivity.this, "Algo salió mal :(", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        }
-    }*/
 }
